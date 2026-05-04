@@ -1,6 +1,6 @@
 # bastion
 
-Error observability for the agent era.
+Error observability framework for the agent era.
 
 ## What is Bastion?
 
