@@ -11,7 +11,7 @@ Bastion sits at the boundary between your code and the agent working on it. It c
 ## Installation
 
 ```bash
-pip install bastion
+pip install bastion-agent
 ```
 
 ## Quick start
