@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bastion-agent"
+version = "0.1.0"
+description = "Error observability for the agent era"
+requires-python = ">=3.9"
+readme = "README.md"
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Debuggers",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["bastion*"]
