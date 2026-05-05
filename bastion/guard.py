@@ -1,4 +1,5 @@
 """Guard decorator for structured exception capture."""
+# note: implemented
 
 import functools
 import hashlib
