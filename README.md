@@ -1,4 +1,4 @@
-# bastion
+# bastion - v1
 
 Error handling framework for the agent era.
 
