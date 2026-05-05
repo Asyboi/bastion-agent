@@ -47,6 +47,71 @@ Truncation limits are user-configurable via `bastion.init(truncation_limits={...
 2. Automatic scrubbing applied
 3. Type-aware truncation appliedpplied first → automatic scrubbing applied second → type-aware truncation applied last.
 
+# FEAT: guard() — hint parameter
+
+## Overview
+
+The `hint` parameter is a developer-authored note attached to the `@guard()`
+decorator that is stored alongside the error record and surfaced to the coding
+agent when it queries the error via MCP. It gives the agent a direct signal
+from the developer about what is likely wrong, rather than requiring the agent
+to reason entirely from the structured error data alone.
+
+## Motivation
+
+Structured error data — type, message, location, local variables — tells the
+agent *what* broke and *where*. It does not always tell the agent *why*. Some
+failure modes are non-obvious from the error alone: an upstream service
+returning an unexpected response, a race condition, a known edge case in a
+third-party library. The developer often knows the likely cause but has no
+way to communicate it to the agent short of a comment in the code the agent
+may or may not read.
+
+`hint` solves this by putting the developer's knowledge directly in the error
+record where the agent will always see it.
+
+## Usage
+
+```python
+@bastion.guard(hint="Check whether the upstream auth service returned a valid session before this runs")
+def process_payment(user_id, amount):
+    ...
+```
+
+## Behavior
+
+- If `hint` is provided, it is stored in the `hint` column of the errors table
+  alongside the structured error record
+- If `hint` is not provided, the column is NULL — no behavior change
+- `hint` is a plain string — no formatting or structure is enforced
+- `hint` is static — it is set at decoration time, not at exception time
+
+## Agent experience
+
+When the agent calls `get_error_detail(error_id)` via MCP, the hint is
+included in the response:
+
+```json
+{
+  "type": "KeyError",
+  "message": "'user_id' not found",
+  "location": "auth/middleware.py:47",
+  "hint": "Check whether the upstream auth service returned a valid session before this runs",
+  "locals": {"request": "..."},
+  "occurrence_count": 12
+}
+```
+
+The agent reads the hint before forming a hypothesis, giving it a head start
+on the likely fix.
+
+## Implementation notes
+
+- Add `hint: Optional[str] = None` as a kwarg to `guard()`
+- Include `"hint": hint` in `error_record` before calling `upsert_error()`
+- The `hint` column already exists in the errors table schema — no migration
+  required
+
 # FEAT — Team Mode & Turso DB Migration
 
 ## Overview

@@ -106,7 +106,7 @@ def upsert_error(record: dict) -> None:
             record.get("file"), # file that the error occurred in
             record.get("line"), # line number where the error occurred
             record.get("locals"), # local variables from context if you set context at the time of the error or all locals if you didn't set context
-            record.get("hint"), # optional developer note that is set in the decorator param
+            record.get("hint"), # optional developer note that is set in the decorator param (currently null - not implemented)
             record.get("first_seen", now), # time stamp when the error first occurred
             now, # time stamp when the error was last seen
         ),
