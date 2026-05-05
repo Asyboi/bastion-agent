@@ -1,19 +1,19 @@
 """Core initialization for Bastion."""
 
-from typing import Any, Dict, Optional
+from pathlib import Path
+from typing import Optional
 
-_config: Dict[str, Any] = {}
+from bastion import db
 
 
-def init(config: Optional[Dict[str, Any]] = None) -> None:
-    """Set up Bastion with optional configuration.
+# TODO: v2 — accept mode="team", db_url, db_token and pass through to db.init_db() for Turso team mode
+def init(db_path: Optional[str] = None) -> None:
+    """Set up Bastion, opening (or creating) the SQLite database.
 
     Args:
-        config: Optional dict with keys like ``db_path``, ``project``.
+        db_path: Path to the SQLite database file. Defaults to ~/.bastion/bastion.db.
     """
-    global _config
-    _config = config or {}
-    print("Bastion initialized")
-    # TODO: open (or create) a SQLite database at _config.get("db_path", ".bastion.db")
-    #       and run the schema migrations to create errors, checkpoints, and expectations tables.
-    # TODO: emit an "init" event record to the SQLite store so agents can see when a session started.
+    resolved = Path(db_path) if db_path else Path.home() / ".bastion" / "bastion.db"
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    db.init_db(str(resolved))
+    print({"status": "initialized", "db_path": str(resolved)})

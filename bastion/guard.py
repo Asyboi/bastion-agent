@@ -1,11 +1,16 @@
 """Guard decorator for structured exception capture."""
 
 import functools
-import inspect
+import hashlib
+import json
 import traceback
 from typing import Any, Callable, List, Optional, TypeVar
 
+from bastion.db import upsert_error
+
 F = TypeVar("F", bound=Callable[..., Any])
+
+_SENSITIVE_KEYS = {"password", "secret", "token", "api_key", "auth", "credential", "ssn", "card", "cvv", "pin"}
 
 
 def guard(context: Optional[List[str]] = None) -> Callable[[F], F]:
@@ -13,7 +18,7 @@ def guard(context: Optional[List[str]] = None) -> Callable[[F], F]:
 
     Args:
         context: Names of local variables to capture from the failing frame.
-                 Stubbed — variable capture is not yet implemented.
+                 When None, all locals are captured (sensitive keys are redacted).
 
     Example::
 
@@ -32,20 +37,35 @@ def guard(context: Optional[List[str]] = None) -> Callable[[F], F]:
                 while tb.tb_next is not None:
                     tb = tb.tb_next
                 frame = tb.tb_frame
+
+                fingerprint = hashlib.sha256(
+                    f"{type(exc).__name__}:{frame.f_code.co_filename}:{tb.tb_lineno}".encode()
+                ).hexdigest()
+
+                raw_locals = frame.f_locals
+                if context is not None:
+                    raw_locals = {k: v for k, v in raw_locals.items() if k in context}
+                redacted = {
+                    k: "[redacted]" if any(s in k.lower() for s in _SENSITIVE_KEYS) else v
+                    for k, v in raw_locals.items()
+                }
+
                 error_record = {
                     "type": type(exc).__name__,
                     "message": str(exc),
                     "function": fn.__qualname__,
                     "file": frame.f_code.co_filename,
                     "line": tb.tb_lineno,
+                    "fingerprint": fingerprint,
+                    "locals": json.dumps(redacted, default=str),
                 }
                 print(error_record)
-                # TODO: capture frame locals via inspect.currentframe() (or the tb frame above),
-                #       filter to only the variable names listed in `context`, and add them to
-                #       error_record under a "locals" key.
-                # TODO: generate a stable fingerprint (e.g. sha256 of type + file + line) and
-                #       add it to error_record under a "fingerprint" key.
-                # TODO: persist error_record to the SQLite errors table opened by core.init().
+
+                try:
+                    upsert_error(error_record)
+                except Exception:
+                    pass
+
                 raise
         return wrapper  # type: ignore[return-value]
     return decorator
