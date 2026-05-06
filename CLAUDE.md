@@ -7,7 +7,7 @@ Bastion is error observability infrastructure for the agent era. The core thesis
 The project has two main components:
 
 1. **Python library** (`bastion/`) — decorators and functions that instrument application code and emit structured records.
-2. **MCP server** (coming in v0.3.0) — a local server that exposes Bastion's SQLite store to any MCP-compatible agent via query tools (`list_errors`, `get_error`, `list_checkpoints`, etc.).
+2. **MCP server** (`bastion/mcp_server.py`) — a local server that exposes Bastion's SQLite store to any MCP-compatible agent via 10 query tools. Start with `python -m bastion` or `bastion-mcp`.
 
 ## Architecture
 
@@ -25,6 +25,9 @@ Structured assertions. `expect(condition, message, context)` is `assert` with an
 
 ### `breadcrumb.py`
 Lightweight event markers. `breadcrumb(message, severity, tags)` records ambient ordered events with no frame capture or condition checking. Useful for agents tracing execution flow between errors and checkpoints. Maps to a `breadcrumbs` SQLite table.
+
+### `mcp_server.py`
+The agent-facing interface for Bastion. A FastMCP server exposing 10 tools that coding agents (Claude Code, Cursor, etc.) call to query the SQLite store during a debugging session. Uses stdio transport. Start with `python -m bastion` or `bastion-mcp` after installation. Tools cover all four tables: errors, checkpoints, expectations, breadcrumbs, plus utility tools for summary and clearing.
 
 ### Relationships
 - All modules import nothing from each other; only `core.py`'s module-level `_db` connection (v0.2+) will be shared.
@@ -50,6 +53,11 @@ Lightweight event markers. `breadcrumb(message, severity, tags)` records ambient
 | v0.3.0  | MCP server with core query tools (`list_errors`, `get_checkpoint`, `query_expectations`) |
 | v1.0.0  | Node.js port, full documentation site, MCP registry listing |
 
+v1.0.0 will also include:
+- MCP server with 10 query tools via stdio transport
+- `bastion-mcp` console script entry point
+- Compatible with Claude Code and Cursor MCP config
+
 ## Working With This Codebase
 
 - **Keep stubs typed.** Every function must have complete type annotations even before the body is implemented. Agents reading the source need to understand signatures without running the code.
@@ -60,3 +68,6 @@ Lightweight event markers. `breadcrumb(message, severity, tags)` records ambient
   ```
 - **No external dependencies** until v0.2.0. The standard library (`inspect`, `traceback`, `datetime`, `sqlite3`) covers everything needed.
 - **One public API, flat.** Do not expose submodule internals. Everything the user needs should be reachable via `import bastion`.
+- **Never import mcp_server in `__init__.py`** — the server is a separate process. Importing it would pull in the `mcp` dependency into every library consumer.
+- **Keep MCP tool docstrings clear and agent-readable** — agents read them to decide which tool to call. Write for programmatic consumers, not humans.
+- **stdout must stay clean when the MCP server is running** — all debug prints from the library should go to stderr when server mode is active. The stdio transport uses stdout as its protocol channel.

@@ -9,11 +9,15 @@ description = "Error observability for the agent era"
 requires-python = ">=3.9"
 readme = "README.md"
 license = { text = "MIT" }
+dependencies = ["mcp"]
 classifiers = [
     "Development Status :: 1 - Planning",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Debuggers",
 ]
+
+[project.scripts]
+bastion-mcp = "bastion.mcp_server:run"
 
 [tool.setuptools.packages.find]
 where = ["."]
