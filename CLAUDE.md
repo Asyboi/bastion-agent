@@ -23,6 +23,9 @@ Lightweight progress markers. `checkpoint(flow, step, data)` records named steps
 ### `expect.py`
 Structured assertions. `expect(condition, message, context)` is `assert` with an agent-readable paper trail. Failed expectations are persisted so agents can query "what invariants broke during this run" without grepping logs.
 
+### `breadcrumb.py`
+Lightweight event markers. `breadcrumb(message, severity, tags)` records ambient ordered events with no frame capture or condition checking. Useful for agents tracing execution flow between errors and checkpoints. Maps to a `breadcrumbs` SQLite table.
+
 ### Relationships
 - All modules import nothing from each other; only `core.py`'s module-level `_db` connection (v0.2+) will be shared.
 - The public API surface is entirely flat: `import bastion` then `bastion.<function>()`.

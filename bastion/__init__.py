@@ -6,5 +6,6 @@ from .core import init
 from .guard import guard
 from .checkpoint import checkpoint
 from .expect import expect
+from .breadcrumb import breadcrumb
 
-__all__ = ["init", "guard", "checkpoint", "expect", "__version__"]
+__all__ = ["init", "guard", "checkpoint", "expect", "breadcrumb", "__version__"]

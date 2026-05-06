@@ -164,11 +164,11 @@ def insert_breadcrumb(record: dict) -> None:
         VALUES (?, ?, ?, ?, ?)
         """,
         (
-            str(uuid.uuid4()),
-            record.get("message"),
-            record.get("severity", "debug"),
-            json.dumps(record.get("tags"), default=str) if record.get("tags") is not None else None,
-            record.get("timestamp", _now()),
+            str(uuid.uuid4()), # unique identifier for the breadcrumb
+            record.get("message"), # human/agent-readable description of the breadcrumb
+            record.get("severity", "debug"), # severity of the breadcrumb (debug, info, warning, error, critical)
+            json.dumps(record.get("tags"), default=str) if record.get("tags") is not None else None, # tags of the breadcrumb for filtering
+            record.get("timestamp", _now()), # time stamp when the breadcrumb was recorded
         ),
     )
     conn.commit()
