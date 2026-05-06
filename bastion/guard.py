@@ -52,13 +52,13 @@ def guard(context: Optional[List[str]] = None) -> Callable[[F], F]:
                 }
 
                 error_record = {
-                    "type": type(exc).__name__,
-                    "message": str(exc),
-                    "function": fn.__qualname__,
-                    "file": frame.f_code.co_filename,
-                    "line": tb.tb_lineno,
-                    "fingerprint": fingerprint,
-                    "locals": json.dumps(redacted, default=str),
+                    "type": type(exc).__name__,                   # str
+                    "message": str(exc),                          # str
+                    "function": fn.__qualname__,                  # str
+                    "file": frame.f_code.co_filename,             # str
+                    "line": tb.tb_lineno,                         # int
+                    "fingerprint": fingerprint,                   # str — sha256 hex digest
+                    "locals": json.dumps(redacted, default=str),  # str — JSON
                 }
                 print(error_record)
 
