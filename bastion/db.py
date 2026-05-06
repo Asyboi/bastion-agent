@@ -143,13 +143,13 @@ def insert_expectation(record: dict) -> None:
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
         (
-            str(uuid.uuid4()),
-            record.get("message"),
-            json.dumps(record.get("context"), default=str) if record.get("context") is not None else None,
-            1 if record.get("passed") else 0,
-            record.get("timestamp", _now()),
-            record.get("file"),
-            record.get("line"),
+            str(uuid.uuid4()), # unique identifier for the expectation
+            record.get("message"), # human/agent-readable description of what was expected
+            json.dumps(record.get("context"), default=str) if record.get("context") is not None else None, # context of the expectation
+            1 if record.get("passed") else 0, # 1 if the expectation passed, 0 if it failed
+            record.get("timestamp", _now()), # time stamp when the expectation was recorded
+            record.get("file"), # file that the expectation was recorded in
+            record.get("line"), # line number where the expectation was recorded
         ),
     )
     conn.commit()

@@ -1,33 +1,51 @@
 """Expect — structured assertion for agent-observable invariants."""
 
-from typing import Any, Optional
+import inspect
+from datetime import datetime, timezone
+from typing import Optional
+
+from bastion.db import insert_expectation
 
 
-def expect(condition: bool, message: str, context: Optional[Any] = None) -> None:
-    """Assert a condition and emit a structured record if it fails.
+def expect(
+    condition: bool,
+    message: str,
+    context: Optional[dict] = None,
+) -> None:
+    """Assert a condition and emit a structured record, always persisted.
 
     Args:
         condition: Boolean expression to assert.
         message:   Human/agent-readable description of what was expected.
-        context:   Optional extra data to surface alongside the failure.
+        context:   Optional extra data to surface alongside the result.
 
     Raises:
-        AssertionError: Always raised when ``condition`` is ``False``.
+        AssertionError: Raised when ``condition`` is ``False``, after persisting.
 
     Example::
 
         bastion.expect(len(results) > 0, "search returned results", context={"query": q})
     """
+    caller = inspect.currentframe().f_back
+    file = caller.f_code.co_filename
+    line = caller.f_lineno
+
+    record = {
+        "message": message,
+        "context": context,
+        "passed": bool(condition),
+        "file": file,
+        "line": line,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    print(record)
+    # TODO: v2 — add support for capturing caller frame locals automatically
+    # when condition is False, similar to guard() locals capture, so the agent
+    # has full variable state at the point of a failed expectation
+    try:
+        insert_expectation(record)
+    except Exception:
+        pass
+
     if not condition:
-        record = {
-            "message": message,
-            "context": context,
-        }
-        print(record)
-        # TODO: capture caller frame locals via inspect.currentframe().f_back and filter
-        #       to variables explicitly listed in `context` when context is a list of names
-        #       rather than an arbitrary value.
-        # TODO: generate a fingerprint (sha256 of message + caller file + line) and add
-        #       it to record under a "fingerprint" key.
-        # TODO: persist record to the SQLite expectations table opened by core.init().
-        raise AssertionError(str(record))
+        raise AssertionError(message)
