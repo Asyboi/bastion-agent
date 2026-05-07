@@ -117,8 +117,8 @@ Add to your Cursor MCP settings (`~/.cursor/mcp.json`):
 {
   "mcpServers": {
     "bastion": {
-      "command": "python",
-      "args": ["-m", "bastion"]
+      "command": "bastion-mcp",
+      "args": []
     }
   }
 }
