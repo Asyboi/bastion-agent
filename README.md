@@ -96,17 +96,16 @@ bastion-mcp
 
 ### Claude Code configuration
 
-Add to your Claude Code MCP settings (`~/.claude/settings.json` or project `.claude/settings.json`):
+Run:
 
-```json
-{
-  "mcpServers": {
-    "bastion": {
-      "command": "python",
-      "args": ["-m", "bastion"]
-    }
-  }
-}
+```bash
+claude mcp add-json bastion '{"type":"stdio","command":"bastion-mcp","args":[]}'
+```
+
+Verify:
+
+```bash
+claude mcp get bastion
 ```
 
 ### Cursor configuration
