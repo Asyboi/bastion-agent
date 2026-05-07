@@ -220,7 +220,7 @@ The library captures structured records at the point of instrumentation and pers
 |---------|-----------|--------|
 | v0.1.0 | Package skeleton — typed stubs, correct public API, importable | ✓ |
 | v0.2.0 | SQLite persistence, `guard()`, `checkpoint()`, `expect()`, `breadcrumb()` | ✓ |
-| v0.3.0 | MCP server with 10 query tools, `bastion-mcp` entry point | ✓ |
+| v0.4.0 | MCP server with 10 query tools, `bastion-mcp` entry point | ✓ |
 | v1.0.0 | Node.js port, full documentation site, MCP registry listing | planned |
 | v2.0.0 | Team mode with Turso DB, per-table clear tools, opt-out variable capture | planned |
 
