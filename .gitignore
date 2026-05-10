@@ -11,6 +11,9 @@ build/
 *.egg
 MANIFEST
 
+# Graphify
+graphify-out/
+
 # Virtual environments
 .venv/
 venv/

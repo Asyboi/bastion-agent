@@ -39,6 +39,7 @@ def guard(context: Optional[List[str]] = None) -> Callable[[F], F]:
                     tb = tb.tb_next
                 frame = tb.tb_frame
 
+                # fingerprint for deduplication of errors
                 fingerprint = hashlib.sha256(
                     f"{type(exc).__name__}:{frame.f_code.co_filename}:{tb.tb_lineno}".encode()
                 ).hexdigest()
@@ -65,6 +66,7 @@ def guard(context: Optional[List[str]] = None) -> Callable[[F], F]:
                 try:
                     upsert_error(error_record)
                 except Exception:
+                    # db error catch
                     pass
 
                 raise
